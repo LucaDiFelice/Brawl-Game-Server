@@ -1,5 +1,6 @@
 using RiptideNetworking;
 using RiptideNetworking.Utils;
+using System;
 using UnityEngine;
 
 public class NetworkManager : MonoBehaviour
