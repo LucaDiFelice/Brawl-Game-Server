@@ -2,7 +2,6 @@
 // SERVER
 
 using RiptideNetworking;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -20,12 +19,34 @@ public class Player : MonoBehaviour
 
     public static void Spawn(ushort id, string username)
     {
+        foreach (Player otherPlayer in list.Values)
+            otherPlayer.SendSpawned(id);
+
         Player player = Instantiate(GameLogic.Singleton.PlayerPrefab, new Vector3(0f, 1f, 0f), Quaternion.identity).GetComponent<Player>();
-        player.name = $"Player {id} ({(string.IsNullOrEmpty(username) ? "Guest" : username)}";
+        player.name = $"Player {id} ({(string.IsNullOrEmpty(username) ? "Guest" : username)})";
         player.Id = id;
         player.Username = string.IsNullOrEmpty(username) ? $"Guest {id}" : username;
 
+        player.SendSpawned();
         list.Add(id, player);
+    }
+
+    private void SendSpawned()
+    {
+        NetworkManager.Singleton.Server.SendToAll(AddSpawnData(Message.Create(MessageSendMode.reliable, (ushort)ServerToClientId.playerSpawned)));
+    }
+
+    private void SendSpawned(ushort toClientID)
+    {
+        NetworkManager.Singleton.Server.Send(AddSpawnData(Message.Create(MessageSendMode.reliable, (ushort)ServerToClientId.playerSpawned)), toClientID);
+    }
+
+    private Message AddSpawnData(Message message)
+    {
+        message.AddUShort(Id);
+        message.AddString(Username);
+        message.AddVector3(transform.position);
+        return message;
     }
 
     [MessageHandler((ushort)ClientToServerId.name)]
