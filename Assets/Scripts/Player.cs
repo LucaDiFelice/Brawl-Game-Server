@@ -12,6 +12,10 @@ public class Player : MonoBehaviour
     public ushort Id { get; private set; }
     public string Username { get; private set; }
 
+    public PlayerMovement Movement => movement;
+
+    [SerializeField] private PlayerMovement movement;
+
     private void OnDestroy()
     {
         list.Remove(Id);
@@ -54,6 +58,14 @@ public class Player : MonoBehaviour
     private static void Name(ushort fromClientId, Message message)
     {
         Spawn(fromClientId, message.GetString());
+    }
+
+    [MessageHandler((ushort)ClientToServerId.input)]
+
+    private static void Input(ushort fromClientId, Message message)
+    {
+        if (list.TryGetValue(fromClientId, out Player player))
+            player.Movement.SetInput(message.GetBools(6), message.GetVector3());
     }
 
 }
