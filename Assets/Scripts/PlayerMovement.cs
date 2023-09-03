@@ -42,6 +42,9 @@ public class PlayerMovement : MonoBehaviour
 
     private void FixedUpdate()
     {
+        if (!player.IsAlive)
+            return;
+
         Vector2 inputDirection = Vector2.zero;
         if (inputs[0])
             inputDirection.y += 1;
@@ -50,10 +53,10 @@ public class PlayerMovement : MonoBehaviour
             inputDirection.y -= 1;
 
         if (inputs[2])
-            inputDirection.y += 1;
+            inputDirection.y -= 1;
 
         if (inputs[3])
-            inputDirection.y -= 1;
+            inputDirection.y += 1;
 
         Move(inputDirection, inputs[4], inputs[5]);
     }
@@ -63,6 +66,20 @@ public class PlayerMovement : MonoBehaviour
         gravityAcceleration = gravity * Time.fixedDeltaTime * Time.fixedDeltaTime;
         moveSpeed = movementSpeed * Time.fixedDeltaTime;
         jumpSpeed = Mathf.Sqrt(jumpHeight * -2f * gravityAcceleration);
+    }
+
+    public void Enabled(bool value)
+    {
+        enabled = value;
+        controller.enabled = value;
+    }
+
+    public void Teleport(Vector3 toPosition)
+    {
+        bool isEnabled = controller.enabled;
+        controller.enabled = false;
+        transform.position = toPosition;
+        controller.enabled = isEnabled;
     }
 
     private void Move(Vector2 inputDirection, bool jump, bool sprint)
